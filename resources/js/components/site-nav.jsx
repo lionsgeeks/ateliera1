@@ -11,7 +11,7 @@ export default function SiteNav({ active = '' }) {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <img src={logo} className='w-12 h-12 object-contain' alt="Atelier A1" />
+              <img src={logo} className='w-18 h-18 object-contain' alt="Atelier A1" />
             </Link>
           </div>
           <div className="hidden md:block">

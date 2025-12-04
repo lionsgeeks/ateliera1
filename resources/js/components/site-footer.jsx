@@ -8,7 +8,7 @@ export default function SiteFooter() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center space-x-2 mb-4">
-              <img src={logo} className='w-[55px] bg-white aspect-square object-cover' alt="" />
+              <img src={logo} className='w-[80px] bg-white aspect-square object-cover' alt="" />
             </Link>
             <p className="text-gray-300 mb-6 max-w-md leading-relaxed">
               Nous créons des chefs-d’œuvre architecturaux qui allient innovation, durabilité et élégance intemporelle depuis plus de deux décennies.
@@ -27,7 +27,7 @@ export default function SiteFooter() {
             <h3 className="text-lg font-semibold mb-4">Coordonnées</h3>
             <ul className="space-y-2 text-gray-300">
               <li>+212 5 2247 49 91</li>
-              <li>info@ateliera1.com </li>
+              <li>info@atelierA1.com </li>
               <li>217 angle rue fraternité  et bd zerktouni 3 ème étage 20 000 Casablanca</li>
             </ul>
           </div>

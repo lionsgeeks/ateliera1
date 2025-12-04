@@ -16,10 +16,73 @@ class ProjectController extends Controller
             ->orderBy('sort_order')
             ->orderBy('created_at', 'desc');
         
+        // Filter by category if provided
+        if ($request->has('category') && $request->category) {
+            $categorySlug = $request->category;
+            // Use proper query grouping to find category by slug or name
+            $category = \App\Models\Category::where(function($q) use ($categorySlug) {
+                $q->where('slug', $categorySlug)
+                  ->orWhere('name', $categorySlug);
+            })->first();
+            
+            if ($category) {
+                $categoryId = (int) $category->id;
+                // Use SQLite-compatible JSON query
+                $driver = \DB::connection()->getDriverName();
+                if ($driver === 'sqlite') {
+                    // SQLite JSON query - check if category_id exists in the JSON array
+                    // Handle both string and integer values in JSON
+                    $query->whereRaw("EXISTS (
+                        SELECT 1 FROM json_each(category_ids) 
+                        WHERE CAST(json_each.value AS INTEGER) = ?
+                    )", [$categoryId]);
+                } else {
+                    // MySQL/PostgreSQL use whereJsonContains
+                    $query->whereJsonContains('category_ids', $categoryId);
+                }
+            }
+        }
+        
         $perPage = 9;
         $projects = $query->paginate($perPage)->withQueryString();
         
         $categories = \App\Models\Category::active()->ordered()->get();
+
+        // Eager-load categories for all projects in the paginated collection
+        $allCategoryIds = collect($projects->items())
+            ->flatMap(function ($project) {
+                return is_array($project->category_ids) ? $project->category_ids : [];
+            })
+            ->unique()
+            ->filter()
+            ->values();
+
+        $categoriesById = \App\Models\Category::whereIn('id', $allCategoryIds)->get()->keyBy('id');
+
+        // Append 'categories' attribute to each project item in the paginator
+        $projects->getCollection()->transform(function ($project) use ($categoriesById) {
+            $ids = is_array($project->category_ids) ? $project->category_ids : [];
+            $project->categories = collect($ids)
+                ->map(function ($id) use ($categoriesById) {
+                    $category = $categoriesById->get((int) $id);
+                    if (!$category) {
+                        return null;
+                    }
+                    // Explicitly map category properties to ensure proper serialization
+                    return [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'slug' => $category->slug,
+                        'color' => $category->color,
+                        'description' => $category->description,
+                        'image_path' => $category->image_path,
+                    ];
+                })
+                ->filter()
+                ->values()
+                ->toArray(); // Convert to array for proper JSON serialization
+            return $project;
+        });
 
         return Inertia::render('projects', [
             'projects' => $projects,

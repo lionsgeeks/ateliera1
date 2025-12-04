@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight, MapPin, Calendar, Filter, Grid, List } from "lucide-react"
-import { Head, Link } from '@inertiajs/react'
-import { useState, useEffect } from 'react'
+import { Head, Link, router } from '@inertiajs/react'
+import { useState, useEffect, useMemo } from 'react'
 import SiteNav from '@/components/site-nav'
 import SiteFooter from '@/components/site-footer'
 
@@ -20,54 +20,94 @@ export default function Projects({ projects, categories = [], selectedCategory =
         return found ? found.name : 'all'
     })
 
-    const filteredProjects = activeCategory === 'all'
-        ? projects?.data || []
-        : (projects?.data || []).filter(project => {
+    const filteredProjects = useMemo(() => {
+        // If backend has already filtered (selectedCategory is set), just return all projects
+        // Otherwise, do client-side filtering
+        if (selectedCategory) {
+            // Backend has already filtered, so return all projects
+            return projects?.data || []
+        }
+        
+        // Client-side filtering for 'all' or when no category is selected
+        if (activeCategory === 'all') {
+            return projects?.data || []
+        }
+        
+        // Normalize category name for comparison (trim whitespace)
+        const normalizedActiveCategory = activeCategory.trim()
+        
+        return (projects?.data || []).filter(project => {
             // New: multiple categories via array of category objects
             if (Array.isArray(project.categories) && project.categories.length > 0) {
-                return project.categories.some(cat => (cat?.name || '') === activeCategory)
+                return project.categories.some(cat => {
+                    const catName = (cat?.name || '').trim()
+                    return catName === normalizedActiveCategory
+                })
             }
             // Backward compatibility: single category object or name string
-            const singleName = project.category?.name || project.category
-            return singleName === activeCategory
+            const singleName = (project.category?.name || project.category || '').trim()
+            return singleName === normalizedActiveCategory
         })
+    }, [activeCategory, projects?.data, selectedCategory])
 
-    // Initialize displayed projects
+    // Update activeCategory when selectedCategory prop changes (from router navigation)
+    useEffect(() => {
+        if (!selectedCategory) {
+            setActiveCategory('all')
+        } else {
+            // selectedCategory may be slug or name. Map slug to name for display and filtering
+            const found = (categories || []).find(c => c.slug === selectedCategory || c.name === selectedCategory)
+            if (found) {
+                setActiveCategory(found.name)
+            }
+        }
+    }, [selectedCategory, categories])
+
+    // Initialize displayed projects on mount
     useEffect(() => {
         setDisplayedProjects(filteredProjects)
     }, [])
 
-    const handleCategoryChange = (categorySlug) => {
-        if (categorySlug === activeCategory) return // Don't animate if same category
+    // Sync displayed projects with filtered projects when activeCategory or projects change (but not during transitions)
+    useEffect(() => {
+        // Only update if not transitioning to avoid flickering during animations
+        // This handles cases where activeCategory changes from URL or other sources
+        if (!isTransitioning) {
+            setDisplayedProjects(filteredProjects)
+        }
+    }, [filteredProjects, isTransitioning])
+
+    const handleCategoryChange = (categoryName) => {
+        if (categoryName === activeCategory) return // Don't animate if same category
 
         // Start transition
         setIsTransitioning(true)
 
-        // Fade out current projects
-        setTimeout(() => {
-            setActiveCategory(categorySlug)
-            // Update URL without page reload
-            const url = categorySlug === 'all' ? '/projects' : `/projects?category=${categorySlug}`
-            window.history.pushState({}, '', url)
+        // Find category slug for URL (if categoryName is not 'all')
+        let categorySlug = categoryName
+        if (categoryName !== 'all') {
+            const foundCategory = categories.find(c => c.name === categoryName)
+            categorySlug = foundCategory?.slug || categoryName
+        }
 
-            // Update displayed projects after fade out
-            const newFilteredProjects = categorySlug === 'all'
-                ? projects?.data || []
-                : (projects?.data || []).filter(project => {
-                    if (Array.isArray(project.categories) && project.categories.length > 0) {
-                        return project.categories.some(cat => (cat?.name || '') === categorySlug)
-                    }
-                    const singleName = project.category?.name || project.category
-                    return singleName === categorySlug
-                })
-
-            setDisplayedProjects(newFilteredProjects)
-
-            // End transition and fade in new projects
-            setTimeout(() => {
-                setIsTransitioning(false)
-            }, 50)
-        }, 200) // Fade out duration
+        // Use Inertia router to navigate and reload from backend with filtered results
+        // This ensures the backend filters the projects correctly
+        const url = categoryName === 'all' ? '/projects' : `/projects?category=${categorySlug}`
+        
+        router.visit(url, {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['projects', 'selectedCategory'], // Only reload projects and selectedCategory
+            onStart: () => {
+                setIsTransitioning(true)
+            },
+            onFinish: () => {
+                // End transition after data is loaded
+                setTimeout(() => {
+                    setIsTransitioning(false)
+                }, 100)
+            }
+        })
     }
 
     return (

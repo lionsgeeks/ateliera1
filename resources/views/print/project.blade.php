@@ -352,7 +352,7 @@
 
     <div class="contact-info">
         <span> +212 5 22 47 49 91</span>
-        <span> info@ateliera1.com</span>
+        <span> info@atelierA1.com</span>
         <span> 217 angle rue Fraternité et bd Zerktouni, 3ᵉ étage, 20 000 Casablanca</span>
     </div>
 </body>

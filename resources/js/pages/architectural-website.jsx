@@ -468,7 +468,7 @@ export default function ArchitecturalWebsite({ featuredCategories = [], featured
                                         </div>
                                         <div>
                                             <div className="font-semibold text-gray-900">Email</div>
-                                            <div className="text-gray-600">info@ateliera1.com </div>
+                                            <div className="text-gray-600">info@atelierA1.com </div>
                                         </div>
                                     </div>
 
