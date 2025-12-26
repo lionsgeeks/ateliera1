@@ -114,6 +114,9 @@ class ProjectController extends Controller
 
         Project::create($validated);
 
+        // Sync storage after image operations
+        $this->syncStorage();
+
         return Redirect::route('admin.projects.index')->with('success', 'Project created successfully');
     }
 
@@ -203,6 +206,9 @@ class ProjectController extends Controller
         }
 
         $project->update($validated);
+
+        // Sync storage after image operations
+        $this->syncStorage();
 
         return Redirect::route('admin.projects.index')->with('success', 'Project updated successfully');
     }
@@ -295,6 +301,9 @@ class ProjectController extends Controller
 
             // Update project
             $project->update(['gallery_images' => $galleryImages]);
+
+            // Sync storage after image operations
+            $this->syncStorage();
 
             return response()->json([
                 'success' => true,

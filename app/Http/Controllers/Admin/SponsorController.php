@@ -39,6 +39,10 @@ class SponsorController extends Controller
         $validated['is_active'] = $validated['is_active'] ?? true;
 
         Sponsor::create($validated);
+
+        // Sync storage after image operations
+        $this->syncStorage();
+
         return Redirect::route('admin.sponsors.index');
     }
 
@@ -67,6 +71,10 @@ class SponsorController extends Controller
         }
 
         $sponsor->update($validated);
+
+        // Sync storage after image operations
+        $this->syncStorage();
+
         return Redirect::route('admin.sponsors.index');
     }
 

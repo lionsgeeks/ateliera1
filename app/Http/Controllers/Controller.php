@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Intervention\Image\Laravel\Facades\Image;
 
@@ -96,5 +97,26 @@ abstract class Controller
         $disk->put($relativePath, $encoded);
 
         return $relativePath;
+    }
+
+    /**
+     * Sync storage from app/public to public_html/storage
+     * This ensures images are accessible from the public directory
+     */
+    protected function syncStorage(): void
+    {
+        $source = '/home/atelie1c/git/ateliera1/storage/app/public';
+        $destination = '/home/atelie1c/public_html/storage';
+
+        if (!File::exists($source)) {
+            return;
+        }
+
+        // Delete destination if it already exists (optional)
+        if (File::exists($destination)) {
+            File::deleteDirectory($destination);
+        }
+
+        File::copyDirectory($source, $destination);
     }
 }

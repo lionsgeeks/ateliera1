@@ -78,6 +78,9 @@ class CategoryController extends Controller
 
         Category::create($validated);
 
+        // Sync storage after image operations
+        $this->syncStorage();
+
         return Redirect::route('admin.categories.index');
     }
 
@@ -159,6 +162,9 @@ class CategoryController extends Controller
             }
 
             $category->update($validated);
+
+            // Sync storage after image operations
+            $this->syncStorage();
 
             // Return JSON response for AJAX requests (modal)
             if ($request->expectsJson()) {
