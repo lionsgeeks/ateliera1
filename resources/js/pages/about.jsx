@@ -4,6 +4,8 @@ import { ArrowRight, Mail, Phone, MapPin, Users, Award, Calendar, Target, Lightb
 import { Head, Link } from '@inertiajs/react'
 import SiteNav from '@/components/site-nav'
 import SiteFooter from '@/components/site-footer'
+import chakibImage from '../../assets/images/team/chakib.jpeg'
+import kassouImage from '../../assets/images/team/KASSOU.jpeg'
 // DB-powered sponsors are provided by the server; defaults removed
 
 export default function About({ milestones = [], sponsors }) {
@@ -12,15 +14,15 @@ export default function About({ milestones = [], sponsors }) {
             id: 1,
             name: "CHAKIB Mustapha",
             role: "Architecte Associé",
-            image: "https://cdn.futura-sciences.com/buildsv6/images/largeoriginal/d/9/a/d9a1058910_50163142_elon-musk1.jpg",
-            bio: "Fondateurs de l’agence, Mustapha orchestre les projets d’envergure avec une solide maîtrise des enjeux urbains et administratifs."
+            image: chakibImage,
+            bio: "Fondateurs de l'agence, Mustapha orchestre les projets d'envergure avec une solide maîtrise des enjeux urbains et administratifs."
         },
         {
             id: 2,
             name: "KASSOU Abderrahim",
             role: "Architecte Associé",
-            image: "https://cdn.futura-sciences.com/buildsv6/images/largeoriginal/d/9/a/d9a1058910_50163142_elon-musk1.jpg",
-            bio: "Fondateur investi dans la société civile, Abderrahim apporte à l’agence une vision élargie, nourrie par ses engagements associatifs et citoyens."
+            image: kassouImage,
+            bio: "Fondateur investi dans la société civile, Abderrahim apporte à l'agence une vision élargie, nourrie par ses engagements associatifs et citoyens."
         },
         {
             id: 3,
@@ -250,14 +252,16 @@ export default function About({ milestones = [], sponsors }) {
                             {team.slice(0, 2).map((member) => (
                                 <div
                                     key={member.id}
-                                    className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl w-[45%] transition-shadow"
+                                    className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl w-[45%] transition-shadow flex"
                                 >
-                                    <img
-                                        src={member.image}
-                                        alt={member.name}
-                                        className="w-full h-64 object-cover"
-                                    />
-                                    <div className="p-6">
+                                    <div className="flex-shrink-0 w-64 h-auto">
+                                        <img
+                                            src={member.image}
+                                            alt={member.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="p-6 flex-1 flex flex-col justify-center">
                                         <h3 className="text-xl font-semibold text-gray-900 mb-2">{member.name}</h3>
                                         <p className="text-gray-600 font-medium mb-3">{member.role}</p>
                                         <p className="text-gray-600 text-sm leading-relaxed">{member.bio}</p>
