@@ -40,7 +40,7 @@ export default function Contact() {
         {
             icon: Mail,
             title: "Email",
-            details: ["info@ateliersa1.com"],
+            details: ["info@atelierA1.com"],
             description: "Envoyez-nous un message"
         },
         {
